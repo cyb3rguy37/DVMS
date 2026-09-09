@@ -87,6 +87,7 @@ class Visit(Base):
 
     visitor = relationship("Visitor", back_populates="visits")
     registered_by_user = relationship("User", back_populates="visits_registered")
+    
     audit_logs = relationship("AuditLog", back_populates="visit")
 
 class AuditLog(Base):
@@ -96,6 +97,7 @@ class AuditLog(Base):
 
     actor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     visitor_id = Column(Integer, ForeignKey("visitors.id"), nullable=True)
+    visit_id = Column(Integer, ForeignKey("visits.id"), nullable=True)
 
     event_type = Column(SqlEnum(AuditEventType), nullable=False)
     event_data = Column(Text, nullable=True)

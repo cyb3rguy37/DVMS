@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Checkout Visitor</h2>
+
+<p class="text-muted">
+    Enter the Visit ID of an active visitor to check them out.
+</p>
+
+<div id="message"></div>
+
+<div class="card p-3 mb-3">
+
+    <form id="checkoutForm">
+
+        <div class="mb-3">
+            <label class="form-label">Visit ID</label>
+            <input
+                id="visit_id"
+                type="number"
+                class="form-control"
+                required
+                min="1">
+        </div>
+
+        <button class="btn btn-success" type="submit">
+            Check Out Visitor
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+
+document
+.getElementById("checkoutForm")
+.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const visitId = document.getElementById("visit_id").value;
+
+    const response = await fetch(`/visits/${visitId}/checkout`, {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        showMessage(
+            "message",
+            "success",
+            data.message || "Visitor checked out successfully."
+        );
+
+        document.getElementById("checkoutForm").reset();
+        return;
+    }
+
+    showMessage(
+        "message",
+        "danger",
+        data.detail || "Checkout failed."
+    );
+
+});
+</script>
+{% endblock %}

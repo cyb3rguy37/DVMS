@@ -80,3 +80,11 @@ def retention_page(request: Request):
         name="retention.html",
         context={}
     )
+
+@router.get("/create-user", response_class=HTMLResponse)
+def create_user_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="create_user.html",
+        context={}
+    )

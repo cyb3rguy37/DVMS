@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>User Management</h2>
+
+<p class="text-muted">
+    Create system users and assign roles.
+</p>
+
+<div id="message"></div>
+
+<div class="card p-3">
+
+    <form id="createUserForm">
+
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input id="username" class="form-control" required minlength="3">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input id="password" type="password" class="form-control" required minlength="8">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Role</label>
+            <select id="role" class="form-control" required>
+                <option value="guard">Guard</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+
+        <button class="btn btn-warning" type="submit">
+            Create User
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+
+document
+.getElementById("createUserForm")
+.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const payload = {
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+        role: document.getElementById("role").value
+    };
+
+    const response = await fetch("/admin/users", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getToken()
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        showMessage(
+            "message",
+            "success",
+            `User ${data.username} created successfully as ${data.role}.`
+        );
+
+        document.getElementById("createUserForm").reset();
+        return;
+    }
+
+    showMessage(
+        "message",
+        "danger",
+        data.detail || "User creation failed."
+    );
+
+});
+</script>
+{% endblock %}

@@ -4,6 +4,7 @@ from app.schemas.visitor import VisitorRegisterRequest, VisitorRegisterResponse,
 from app.schemas.audit import AuditVerificationResponse
 from app.schemas.visit import ActiveVisitResponse, VisitCheckoutResponse
 from app.schemas.report import ReportSummaryResponse
+from app.schemas.retention import RetentionCleanupResponse
 
 __all__ = [
     "CurrentUserResponse",
@@ -17,4 +18,5 @@ __all__ = [
     "VisitCheckoutResponse",
     "ActiveVisitResponse",
     "ReportSummaryResponse",
+    "RetentionCleanupResponse",
 ]

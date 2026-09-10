@@ -2,7 +2,7 @@ from fastapi import FastAPI
 
 #from app.api.routers import admin, auth
 from app.core.config import settings
-from app.api.routers import admin, audit, auth, reports, visitors, visits
+from app.api.routers import admin, audit, auth, reports, retention, visitors, visits
 
 app = FastAPI(title=settings.app_name)
 
@@ -16,3 +16,4 @@ app.include_router(visitors.router)
 app.include_router(audit.router)
 app.include_router(visits.router)
 app.include_router(reports.router)
+app.include_router(retention.router)

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Audit Verification</h2>
+
+<p class="text-muted">
+    Verify the tamper-evident audit log hash chain.
+</p>
+
+<div id="message"></div>
+
+<div class="card p-3">
+
+    <button class="btn btn-dark" onclick="verifyAudit()">
+        Run Audit Verification
+    </button>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+
+async function verifyAudit() {
+    const response = await fetch("/audit/verify", {
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        showMessage("message", "danger", data.detail || "Audit verification failed.");
+        return;
+    }
+
+    if (data.valid) {
+        showMessage("message", "success", data.message);
+        return;
+    }
+
+    showMessage(
+        "message",
+        "danger",
+        `${data.message}. Broken at event ID: ${data.broken_at_event_id}`
+    );
+}
+</script>
+{% endblock %}

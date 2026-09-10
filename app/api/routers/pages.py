@@ -64,3 +64,11 @@ def reports_page(request: Request):
         name="reports.html",
         context={}
     )
+
+@router.get("/audit-verify", response_class=HTMLResponse)
+def audit_verify_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="audit.html",
+        context={}
+    )

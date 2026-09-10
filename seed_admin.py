@@ -12,7 +12,7 @@ else:
     admin = User(
         username="admin",
         password_hash=hash_password("AdminPass123!"),
-        role=UserRole.admin,
+        role=UserRole.ADMIN,
         is_active=True
     )
 

@@ -17,7 +17,7 @@ router = APIRouter(
 def create_user(
     payload: UserCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_roles([UserRole.ADMIN]))
+    current_user: User = Depends(require_roles(UserRole.ADMIN))
 ):
     #check if user already exists
     existing_user = db.query(User).filter(User.username == payload.username).first()

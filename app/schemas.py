@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from app.db.models import UserRole
 
@@ -19,10 +19,16 @@ class CurrentUserResponse(BaseModel):
     role: str
 
 #define a schema for user creation (admin only)
+#with input validation for username and password
 class UserCreate(BaseModel):
-    username: str
-    password: str
+    username: str = Field(min_length=3, max_length=50)
+    password: str = Field(min_length=8, max_length=128)
     role: UserRole
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, value: str) -> str:
+        return value.strip().lower()
 
 #define a schema for API response for user creation
 class UserResponse(BaseModel):

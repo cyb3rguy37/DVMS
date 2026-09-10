@@ -2,9 +2,16 @@ from fastapi import FastAPI
 
 #from app.api.routers import admin, auth
 from app.core.config import settings
-from app.api.routers import admin, audit, auth, reports, retention, visitors, visits
+from app.api.routers import admin, audit, auth, pages, reports, retention, visitors, visits
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title=settings.app_name)
+
+app.mount(
+    "/static",
+    StaticFiles(directory="app/static"),
+    name="static"
+)
 
 @app.get("/")
 def root():
@@ -17,3 +24,4 @@ app.include_router(audit.router)
 app.include_router(visits.router)
 app.include_router(reports.router)
 app.include_router(retention.router)
+app.include_router(pages.router)

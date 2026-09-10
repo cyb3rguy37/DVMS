@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Dashboard</h2>
+
+<p class="text-muted">
+    Welcome to DVMS.
+</p>
+
+<div class="row">
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Register Visitor</h5>
+            <p>Create a privacy-protected visitor record.</p>
+            <a href="#" class="btn btn-primary disabled">Coming Soon</a>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Active Visitors</h5>
+            <p>View visitors currently inside the premises.</p>
+            <a href="#" class="btn btn-success disabled">Coming Soon</a>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Audit Verification</h5>
+            <p>Verify tamper-evident audit logs.</p>
+            <a href="#" class="btn btn-dark disabled">Coming Soon</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+</script>
+{% endblock %}

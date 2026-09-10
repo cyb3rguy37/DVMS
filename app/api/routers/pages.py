@@ -56,3 +56,11 @@ def checkout_visitor_page(request: Request):
         name="checkout_visitor.html",
         context={}
     )
+
+@router.get("/reports", response_class=HTMLResponse)
+def reports_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="reports.html",
+        context={}
+    )

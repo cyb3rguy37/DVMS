@@ -22,3 +22,12 @@ class VisitorRegisterResponse(BaseModel):
     host_name: str
     status: VisitStatus
     check_in_time: datetime
+
+class VisitorSearchResponse(BaseModel):
+    visitor_id: int
+    visit_id: int
+    masked_name: str
+    masked_phone: str | None
+    host_name: str
+    status: VisitStatus
+    check_in_time: datetime

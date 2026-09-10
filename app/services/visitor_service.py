@@ -2,9 +2,9 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.db.models import AuditEventType, ConsentRecord, Visit, Visitor, VisitStatus
-from app.schemas import VisitorRegisterRequest, VisitorRegisterResponse
+from app.schemas import VisitorRegisterRequest, VisitorRegisterResponse, VisitorSearchResponse
 from app.utils.blind_index import create_blind_index
-from app.utils.encryption import encrypt_value, mask_text
+from app.utils.encryption import decrypt_value, encrypt_value, mask_text
 from app.utils.retention import calculate_retention_expiry
 
 from app.services.audit_service import create_audit_event
@@ -82,3 +82,57 @@ def register_visitor_service(
         status=visit.status,
         check_in_time=visit.check_in_time
     )
+
+
+def search_visitor_service(
+    db: Session,
+    phone_number: str | None = None,
+    id_number: str | None = None
+) -> list[VisitorSearchResponse]:
+    if not phone_number and not id_number:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide phone number or ID number"
+        )
+
+    query = db.query(Visitor)
+
+    if phone_number:
+        query = query.filter(
+            Visitor.phone_blind_index == create_blind_index(phone_number)
+        )
+
+    if id_number:
+        query = query.filter(
+            Visitor.id_blind_index == create_blind_index(id_number)
+        )
+
+    visitors = query.all()
+
+    results = []
+
+    for visitor in visitors:
+        latest_visit = (
+            db.query(Visit)
+            .filter(Visit.visitor_id == visitor.id)
+            .order_by(Visit.id.desc())
+            .first()
+        )
+
+        if latest_visit:
+            name = decrypt_value(visitor.encrypted_name)
+            phone = decrypt_value(visitor.encrypted_phone)
+
+            results.append(
+                VisitorSearchResponse(
+                    visitor_id=visitor.id,
+                    visit_id=latest_visit.id,
+                    masked_name=mask_text(name),
+                    masked_phone=mask_text(phone),
+                    host_name=latest_visit.host_name,
+                    status=latest_visit.status,
+                    check_in_time=latest_visit.check_in_time
+                )
+            )
+
+    return results

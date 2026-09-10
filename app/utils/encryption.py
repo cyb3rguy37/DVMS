@@ -26,7 +26,7 @@ def decrypt_value(ciphertext: str | None) -> str | None:
     return decrypted.decode()
 
 #helper to mask display values
-def mask_text(value: str | None, visible_chars: int = 4) -> str | None:
+def mask_text(value: str | None, visible_chars: int = 2) -> str | None:
     if not value:
         return None
 

@@ -10,10 +10,10 @@ def authenticate_user(db: Session, username: str, password: str) -> TokenRespons
     user = db.query(User).filter(User.username == username).first()
 
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     
     if not verify_password(password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     
     token = create_access_token(data={"sub": str(user.id), "role": user.role.value})
 

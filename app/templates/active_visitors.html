@@ -24,6 +24,7 @@
             <th>Purpose</th>
             <th>Check-in</th>
             <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
 
@@ -70,11 +71,52 @@ async function loadActiveVisitors() {
                 <td>${item.purpose || ""}</td>
                 <td>${item.check_in_time}</td>
                 <td>${item.status}</td>
+                <td>
+                    <button
+                        class="btn btn-sm btn-success"
+                        onclick="checkoutVisitor(${item.visit_id})">
+                        Check Out
+                    </button>
+                </td>
             </tr>
         `;
     });
 }
 
 loadActiveVisitors();
+
+async function checkoutVisitor(visitId) {
+    const confirmed = confirm("Check out this visitor?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    const response = await fetch(`/visits/${visitId}/checkout`, {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        showMessage(
+            "message",
+            "success",
+            data.message || "Visitor checked out successfully."
+        );
+
+        loadActiveVisitors();
+        return;
+    }
+
+    showMessage(
+        "message",
+        "danger",
+        data.detail || "Checkout failed."
+    );
+}
 </script>
 {% endblock %}

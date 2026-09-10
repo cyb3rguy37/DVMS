@@ -8,11 +8,22 @@ function getToken() {
 //save JWT token
 function setToken(token) {
     localStorage.setItem("token", token);
+
+    const payload = decodeJwt(token);
+
+    if (payload && payload.role) {
+        localStorage.setItem("role", payload.role);
+    }
+}
+
+function getRole() {
+    return localStorage.getItem("role");
 }
 
 //logout
 function logout() {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     window.location.href = "/login";
 }
 
@@ -32,4 +43,28 @@ function showMessage(elementId, type, message) {
             ${message}
         </div>
     `;
+}
+
+function decodeJwt(token) {
+    try {
+        const payload = token.split(".")[1];
+        return JSON.parse(atob(payload));
+    } catch {
+        return null;
+    }
+}
+
+
+function applyRoleNavigation() {
+    const role = getRole();
+
+    document.querySelectorAll("[data-roles]").forEach(function(element) {
+        const allowedRoles = element
+            .getAttribute("data-roles")
+            .split(",");
+
+        if (!allowedRoles.includes(role)) {
+            element.style.display = "none";
+        }
+    });
 }

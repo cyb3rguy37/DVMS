@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Retention Management</h2>
+
+<p class="text-muted">
+    Remove expired visitor personal data according to the retention policy.
+    Visit history and audit logs are preserved for accountability.
+</p>
+
+<div id="message"></div>
+
+<div class="card p-3">
+
+    <p>
+        This action deletes expired encrypted PII and blind indexes from visitor records.
+    </p>
+
+    <button class="btn btn-danger" onclick="runRetentionCleanup()">
+        Run Retention Cleanup
+    </button>
+
+</div>
+
+<div id="cleanupResult" class="mt-3"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+
+async function runRetentionCleanup() {
+    const confirmed = confirm("Run retention cleanup for expired visitor records?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    const response = await fetch("/retention/cleanup", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        showMessage("message", "danger", data.detail || "Retention cleanup failed.");
+        return;
+    }
+
+    showMessage("message", "success", data.message);
+
+    document.getElementById("cleanupResult").innerHTML = `
+        <div class="card p-3">
+            <h5>Cleanup Result</h5>
+            <p><strong>Deleted Visitors:</strong> ${data.deleted_visitors}</p>
+            <p><strong>Affected Visitor IDs:</strong> ${data.affected_visitor_ids.join(", ") || "None"}</p>
+        </div>
+    `;
+}
+</script>
+{% endblock %}

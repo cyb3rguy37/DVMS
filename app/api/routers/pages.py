@@ -72,3 +72,11 @@ def audit_verify_page(request: Request):
         name="audit.html",
         context={}
     )
+
+@router.get("/retention", response_class=HTMLResponse)
+def retention_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="retention.html",
+        context={}
+    )

@@ -1,6 +1,7 @@
 from app.schemas.auth import CurrentUserResponse, TokenResponse
 from app.schemas.user import UserCreate, UserResponse
 from app.schemas.visitor import VisitorRegisterRequest, VisitorRegisterResponse
+from app.schemas.audit import AuditVerificationResponse
 
 __all__ = [
     "CurrentUserResponse",
@@ -9,4 +10,5 @@ __all__ = [
     "UserResponse"
     "VisitorRegisterRequest",
     "VisitorRegisterResponse",
+    "AuditVerificationResponse",
 ]

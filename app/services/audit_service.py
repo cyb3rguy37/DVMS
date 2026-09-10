@@ -47,3 +47,29 @@ def create_audit_event(
     db.refresh(audit_log)
 
     return audit_log
+
+
+def verify_audit_chain(db: Session) -> tuple[bool, int | None]:
+    logs = db.query(AuditLog).order_by(AuditLog.id.asc()).all()
+
+    expected_previous_hash = GENESIS_HASH
+
+    for log in logs:
+        recalculated_hash = compute_audit_hash(
+            event_type=log.event_type.value,
+            actor_id=log.actor_id,
+            visit_id=log.visit_id,
+            event_data=log.event_data,
+            previous_hash=log.previous_hash,
+            timestamp=log.timestamp
+        )
+
+        if log.previous_hash != expected_previous_hash:
+            return False, log.id
+
+        if log.current_hash != recalculated_hash:
+            return False, log.id
+
+        expected_previous_hash = log.current_hash
+
+    return True, None

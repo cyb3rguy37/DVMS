@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.db.models import ConsentRecord, Visit, Visitor, VisitStatus, AuditEventType
+from app.db.models import AuditEventType, ConsentRecord, Visit, Visitor, VisitStatus
 from app.schemas import VisitorRegisterRequest, VisitorRegisterResponse
 from app.utils.blind_index import create_blind_index
 from app.utils.encryption import encrypt_value, mask_text

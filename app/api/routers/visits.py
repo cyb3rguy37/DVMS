@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.api.deps import require_roles
 from app.db.database import get_db
 from app.db.models import User, UserRole
-from app.schemas import VisitCheckoutResponse
-from app.services.visit_service import checkout_visit_service
+from app.schemas import ActiveVisitResponse, VisitCheckoutResponse
+from app.services.visit_service import checkout_visit_service, get_active_visits_service
 
 
 router = APIRouter(
@@ -25,3 +25,12 @@ def checkout_visit(
         visit_id=visit_id,
         actor_id=current_user.id
     )
+
+@router.get("/active", response_model=list[ActiveVisitResponse])
+def get_active_visits(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(UserRole.GUARD, UserRole.ADMIN, UserRole.AUDITOR)
+    )
+):
+    return get_active_visits_service(db=db)

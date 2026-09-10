@@ -3,9 +3,10 @@ from datetime import datetime
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.db.models import AuditEventType, Visit, VisitStatus
-from app.schemas import VisitCheckoutResponse
+from app.db.models import AuditEventType, Visit, VisitStatus, Visitor
+from app.schemas import ActiveVisitResponse, VisitCheckoutResponse
 from app.services.audit_service import create_audit_event
+from app.utils.encryption import decrypt_value, mask_text
 
 
 def checkout_visit_service(
@@ -50,3 +51,38 @@ def checkout_visit_service(
         check_out_time=visit.check_out_time,
         message="Visitor checked out successfully"
     )
+
+#find active visitors and return masked values
+def get_active_visits_service(
+    db: Session
+) -> list[ActiveVisitResponse]:
+    visits = (
+        db.query(Visit)
+        .filter(Visit.status == VisitStatus.ACTIVE)
+        .order_by(Visit.check_in_time.desc())
+        .all()
+    )
+
+    results = []
+
+    for visit in visits:
+        visitor = db.query(Visitor).filter(Visitor.id == visit.visitor_id).first()
+
+        if visitor:
+            name = decrypt_value(visitor.encrypted_name)
+            phone = decrypt_value(visitor.encrypted_phone)
+
+            results.append(
+                ActiveVisitResponse(
+                    visit_id=visit.id,
+                    visitor_id=visitor.id,
+                    masked_name=mask_text(name),
+                    masked_phone=mask_text(phone),
+                    host_name=visit.host_name,
+                    purpose=visit.purpose,
+                    check_in_time=visit.check_in_time,
+                    status=visit.status
+                )
+            )
+
+    return results

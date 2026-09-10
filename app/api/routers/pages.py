@@ -32,3 +32,11 @@ def register_visitor_page(request: Request):
         name="register_visitor.html",
         context={}
     )
+
+@router.get("/search-visitor", response_class=HTMLResponse)
+def search_visitor_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="search_visitor.html",
+        context={}
+    )

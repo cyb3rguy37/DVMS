@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Search Visitor</h2>
+
+<div id="message"></div>
+
+<div class="card p-3 mb-3">
+
+    <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <input id="phone_number" class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">ID / Passport Number</label>
+        <input id="id_number" class="form-control">
+    </div>
+
+    <button class="btn btn-primary" onclick="searchVisitor()">
+        Search
+    </button>
+
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Visit ID</th>
+            <th>Visitor</th>
+            <th>Phone</th>
+            <th>Host</th>
+            <th>Status</th>
+            <th>Check-in</th>
+        </tr>
+    </thead>
+
+    <tbody id="results"></tbody>
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+
+async function searchVisitor() {
+    const phoneNumber = document.getElementById("phone_number").value;
+    const idNumber = document.getElementById("id_number").value;
+
+    if (!phoneNumber && !idNumber) {
+        showMessage("message", "warning", "Enter phone number or ID/passport number.");
+        return;
+    }
+
+    let url = "/visitors/search?";
+
+    if (phoneNumber) {
+        url += "phone_number=" + encodeURIComponent(phoneNumber) + "&";
+    }
+
+    if (idNumber) {
+        url += "id_number=" + encodeURIComponent(idNumber);
+    }
+
+    const response = await fetch(url, {
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    const data = await response.json();
+
+    const results = document.getElementById("results");
+    results.innerHTML = "";
+
+    if (!response.ok) {
+        showMessage("message", "danger", data.detail || "Search failed.");
+        return;
+    }
+
+    if (data.length === 0) {
+        showMessage("message", "info", "No matching visitor found.");
+        return;
+    }
+
+    showMessage("message", "success", `${data.length} result(s) found.`);
+
+    data.forEach(item => {
+        results.innerHTML += `
+            <tr>
+                <td>${item.visit_id}</td>
+                <td>${item.masked_name}</td>
+                <td>${item.masked_phone || ""}</td>
+                <td>${item.host_name}</td>
+                <td>${item.status}</td>
+                <td>${item.check_in_time}</td>
+            </tr>
+        `;
+    });
+}
+</script>
+{% endblock %}

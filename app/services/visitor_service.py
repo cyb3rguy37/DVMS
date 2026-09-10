@@ -1,0 +1,70 @@
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.db.models import ConsentRecord, Visit, Visitor, VisitStatus
+from app.schemas import VisitorRegisterRequest, VisitorRegisterResponse
+from app.utils.blind_index import create_blind_index
+from app.utils.encryption import encrypt_value, mask_text
+from app.utils.retention import calculate_retention_expiry
+
+def register_visitor_service(
+    db: Session,
+    payload: VisitorRegisterRequest,
+    registered_by: int
+) -> VisitorRegisterResponse:
+
+#require consent for registration
+    if not payload.consent_given:
+        raise HTTPException(
+            status_code=400,
+            detail="Visitor consent is required"
+        )
+
+#encrypt visitor PII, create blind indexes, calculate retention expiry
+    visitor = Visitor(
+        encrypted_name=encrypt_value(payload.full_name),
+        encrypted_phone=encrypt_value(payload.phone_number),
+        encrypted_id_number=encrypt_value(payload.id_number),
+        phone_blind_index=create_blind_index(payload.phone_number),
+        id_blind_index=create_blind_index(payload.id_number),
+        retention_expiry=calculate_retention_expiry()
+    )
+
+#create a visitor record
+    db.add(visitor)
+    db.commit()
+    db.refresh(visitor)
+
+#create a visit record
+    visit = Visit(
+        visitor_id=visitor.id,
+        registered_by=registered_by,
+        host_name=payload.host_name,
+        purpose=payload.purpose,
+        status=VisitStatus.ACTIVE
+    )
+
+    db.add(visit)
+    db.commit()
+    db.refresh(visit)
+
+#create a consent record
+    consent = ConsentRecord(
+        visitor_id=visitor.id,
+        consent_text="Visitor data collected for access control and accountability.",
+        consent_given=True
+    )
+
+    db.add(consent)
+    db.commit()
+
+#return only masked visitor data
+    return VisitorRegisterResponse(
+        visitor_id=visitor.id,
+        visit_id=visit.id,
+        masked_name=mask_text(payload.full_name),
+        masked_phone=mask_text(payload.phone_number),
+        host_name=visit.host_name,
+        status=visit.status,
+        check_in_time=visit.check_in_time
+    )

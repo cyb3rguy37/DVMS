@@ -24,3 +24,13 @@ def decrypt_value(ciphertext: str | None) -> str | None:
     decrypted = fernet.decrypt(ciphertext.encode())
 
     return decrypted.decode()
+
+#helper to mask display values
+def mask_text(value: str | None, visible_chars: int = 4) -> str | None:
+    if not value:
+        return None
+
+    if len(value) <= visible_chars:
+        return "*" * len(value)
+
+    return value[:visible_chars] + "*" * (len(value) - visible_chars)

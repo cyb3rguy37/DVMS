@@ -40,3 +40,11 @@ def search_visitor_page(request: Request):
         name="search_visitor.html",
         context={}
     )
+
+@router.get("/active-visitors", response_class=HTMLResponse)
+def active_visitors_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="active_visitors.html",
+        context={}
+    )

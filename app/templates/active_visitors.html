@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Active Visitors</h2>
+
+<p class="text-muted">
+    Visitors currently checked in and not yet checked out.
+</p>
+
+<div id="message"></div>
+
+<button class="btn btn-primary mb-3" onclick="loadActiveVisitors()">
+    Refresh
+</button>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Visit ID</th>
+            <th>Visitor</th>
+            <th>Phone</th>
+            <th>Host</th>
+            <th>Purpose</th>
+            <th>Check-in</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody id="activeVisitors"></tbody>
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+
+async function loadActiveVisitors() {
+    const response = await fetch("/visits/active", {
+        headers: {
+            "Authorization": "Bearer " + getToken()
+        }
+    });
+
+    const data = await response.json();
+
+    const tableBody = document.getElementById("activeVisitors");
+    tableBody.innerHTML = "";
+
+    if (!response.ok) {
+        showMessage("message", "danger", data.detail || "Failed to load active visitors.");
+        return;
+    }
+
+    if (data.length === 0) {
+        showMessage("message", "info", "No active visitors currently.");
+        return;
+    }
+
+    showMessage("message", "success", `${data.length} active visitor(s) found.`);
+
+    data.forEach(item => {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${item.visit_id}</td>
+                <td>${item.masked_name}</td>
+                <td>${item.masked_phone || ""}</td>
+                <td>${item.host_name}</td>
+                <td>${item.purpose || ""}</td>
+                <td>${item.check_in_time}</td>
+                <td>${item.status}</td>
+            </tr>
+        `;
+    });
+}
+
+loadActiveVisitors();
+</script>
+{% endblock %}

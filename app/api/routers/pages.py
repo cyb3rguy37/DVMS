@@ -24,3 +24,11 @@ def dashboard_page(request: Request):
         name="dashboard.html",
         context={"request": request}
     )
+
+@router.get("/register-visitor", response_class=HTMLResponse)
+def register_visitor_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="register_visitor.html",
+        context={}
+    )

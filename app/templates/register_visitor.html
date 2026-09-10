@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Register Visitor</h2>
+
+<div id="message"></div>
+
+<div class="card p-3">
+
+    <form id="visitorForm">
+
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input id="full_name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phone Number</label>
+            <input id="phone_number" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">ID / Passport Number</label>
+            <input id="id_number" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Host / Office</label>
+            <input id="host_name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Purpose</label>
+            <input id="purpose" class="form-control">
+        </div>
+
+        <div class="form-check mb-3">
+            <input id="consent_given" type="checkbox" class="form-check-input">
+            <label class="form-check-label">
+                Visitor consents to data processing for access control and accountability.
+            </label>
+        </div>
+
+        <button class="btn btn-primary" type="submit">
+            Register Visitor
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+requireLogin();
+
+document
+.getElementById("visitorForm")
+.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const payload = {
+        full_name: document.getElementById("full_name").value,
+        phone_number: document.getElementById("phone_number").value || null,
+        id_number: document.getElementById("id_number").value || null,
+        host_name: document.getElementById("host_name").value,
+        purpose: document.getElementById("purpose").value || null,
+        consent_given: document.getElementById("consent_given").checked
+    };
+
+    const response = await fetch("/visitors/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + getToken()
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        showMessage(
+            "message",
+            "success",
+            `Visitor registered successfully. Visit ID: ${data.visit_id}`
+        );
+
+        document.getElementById("visitorForm").reset();
+        return;
+    }
+
+    showMessage(
+        "message",
+        "danger",
+        data.detail || "Visitor registration failed."
+    );
+
+});
+</script>
+{% endblock %}

@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
-from app.core.security import verify_password, create_access_token
 from app.db.database import get_db
 from app.db.models import User
 from app.schemas import CurrentUserResponse, TokenResponse
+
+from app.services.auth_service import authenticate_user
 
 #create authentication router 
 router = APIRouter(
@@ -21,17 +22,8 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.username == form_data.username).first()
+    return authenticate_user(db=db, username=form_data.username, password=form_data.password)
 
-    if not user:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
-    if not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
-    token = create_access_token(data={"sub": str(user.id), "role": user.role.value})
-
-    return TokenResponse(access_token=token, token_type="bearer")
 
 @router.get("/me", response_model=CurrentUserResponse)
 def get_me(

@@ -1,11 +1,13 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.db.models import ConsentRecord, Visit, Visitor, VisitStatus
+from app.db.models import ConsentRecord, Visit, Visitor, VisitStatus, AuditEventType
 from app.schemas import VisitorRegisterRequest, VisitorRegisterResponse
 from app.utils.blind_index import create_blind_index
 from app.utils.encryption import encrypt_value, mask_text
 from app.utils.retention import calculate_retention_expiry
+
+from app.services.audit_service import create_audit_event
 
 def register_visitor_service(
     db: Session,
@@ -57,6 +59,18 @@ def register_visitor_service(
 
     db.add(consent)
     db.commit()
+
+    create_audit_event(
+        db=db,
+        event_type=AuditEventType.REGISTER_VISITOR,
+        actor_id=registered_by,
+        visit_id=visit.id,
+        event_data={
+            "visitor_id": visitor.id,
+            "host_name": visit.host_name,
+            "purpose": visit.purpose
+        }
+    )
 
 #return only masked visitor data
     return VisitorRegisterResponse(
